@@ -86,9 +86,9 @@ def student_result():
     cursor = conn.cursor()
 
     if request.method == 'POST':
-        subject_name = request.form.get('subject_name', '')
-        exam_level = request.form.get('exam_level', '')
-        session_name = request.form.get('session_name', '')
+        subject_name = request.form.get('subject_name', '').strip()
+        exam_level = request.form.get('exam_level', '').strip()
+        session_name = request.form.get('session_name', '').strip()
 
         query = """
             SELECT u.FirstName, u.LastName, s.SubjectName, e.ExamLevel, ses.SessionName, r.Grade, r.Score,
@@ -105,21 +105,27 @@ def student_result():
             LEFT JOIN ResultDetail rd ON r.ResultID = rd.ResultID
             LEFT JOIN Result_Remarks rr ON r.ResultID = rr.ResultID
             WHERE st.UserID = %s
-            GROUP BY r.ResultID, u.FirstName, u.LastName, s.SubjectName, e.ExamLevel, ses.SessionName, 
-                     r.Grade, r.Score
         """
         params = [user_id]
 
-        # Add filters if provided
+        conditions = []
         if subject_name:
-            query += " AND s.SubjectName = %s"
+            conditions.append("BINARY s.SubjectName = %s")
             params.append(subject_name)
         if exam_level:
-            query += " AND e.ExamLevel = %s"
+            conditions.append("BINARY e.ExamLevel = %s")
             params.append(exam_level)
         if session_name:
-            query += " AND ses.SessionName = %s"
+            conditions.append("BINARY ses.SessionName = %s")
             params.append(session_name)
+
+        if conditions:
+            query += " AND " + " AND ".join(conditions)
+
+        query += """
+            GROUP BY r.ResultID, u.FirstName, u.LastName, s.SubjectName, e.ExamLevel, ses.SessionName, 
+                     r.Grade, r.Score
+        """
 
         cursor.execute(query, params)
         results = cursor.fetchall()
@@ -128,7 +134,6 @@ def student_result():
         conn.close()
         return render_template('student_result.html', results=results, user_id=user_id)
 
-    # GET request: Show the form
     cursor.close()
     conn.close()
     return render_template('student_result.html', results=None, user_id=user_id)
@@ -146,14 +151,10 @@ def admin_fetch_result():
         return jsonify({'error': 'Unauthorized'}), 403
 
     student_id = request.form.get('student_id')
-    subject_name = request.form.get('subject_name')
-    exam_level = request.form.get('exam_level')
-    session_name = request.form.get('session_name')
+    subject_name = request.form.get('subject_name', '').strip()
+    exam_level = request.form.get('exam_level', '').strip()
+    session_name = request.form.get('session_name', '').strip()
 
-    # Debugging: Log the received student_id
-    print(f"Received student_id: {student_id}")
-
-    # Make student_id mandatory
     if not student_id:
         return jsonify({'error': 'Student ID is required'}), 400
 
@@ -176,20 +177,27 @@ def admin_fetch_result():
         LEFT JOIN ResultDetail rd ON r.ResultID = rd.ResultID
         LEFT JOIN Result_Remarks rr ON r.ResultID = rr.ResultID
         WHERE st.UserID = %s
-        GROUP BY r.ResultID, u.FirstName, u.LastName, s.SubjectName, e.ExamLevel, ses.SessionName, 
-                 r.Grade, r.Score, r.ResultDate, r.Status
     """
     params = [student_id]
 
+    conditions = []
     if subject_name:
-        query += " AND s.SubjectName = %s"
+        conditions.append("BINARY s.SubjectName = %s")
         params.append(subject_name)
     if exam_level:
-        query += " AND e.ExamLevel = %s"
+        conditions.append("BINARY e.ExamLevel = %s")
         params.append(exam_level)
     if session_name:
-        query += " AND ses.SessionName = %s"
+        conditions.append("BINARY ses.SessionName = %s")
         params.append(session_name)
+
+    if conditions:
+        query += " AND " + " AND ".join(conditions)
+
+    query += """
+        GROUP BY r.ResultID, u.FirstName, u.LastName, s.SubjectName, e.ExamLevel, ses.SessionName, 
+                 r.Grade, r.Score, r.ResultDate, r.Status
+    """
 
     cursor.execute(query, params)
     results = cursor.fetchall()
@@ -452,6 +460,3 @@ def logout():
 if __name__ == '__main__':
     print("Starting Flask app...")
     app.run(debug=True, port=5001)  # Change to port 5001
-
-if __name__ == '__main__':
-    app.run(debug=True)

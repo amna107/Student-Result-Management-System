@@ -140,7 +140,7 @@
     </div>
     <div class="container">
         <h2>Results for Student {{ user_id }}</h2>
-        <form class="filter-form" method="POST">
+        <form class="filter-form" method="POST" onsubmit="console.log('Form submitted with:', new FormData(this))">
             <input type="text" name="subject_name" placeholder="Subject Name">
             <select name="exam_level">
                 <option value="">All Exam Levels</option>
