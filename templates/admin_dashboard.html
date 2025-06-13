@@ -103,8 +103,13 @@
             background: linear-gradient(90deg, #212121, #424242);
             transform: translateY(-3px);
         }
+        .results-table-container {
+            overflow-x: auto; /* Horizontal scrolling for wide tables */
+            max-width: 100%;
+        }
         table {
             width: 100%;
+            min-width: 800px; /* Minimum width to ensure readability */
             border-collapse: collapse;
             margin-top: 20px;
             background-color: #ffffff;
@@ -118,6 +123,7 @@
         th, td {
             padding: 15px;
             text-align: left;
+            white-space: nowrap; /* Prevent text wrapping */
         }
         th {
             background: linear-gradient(90deg, #d32f2f, #b71c1c);
@@ -291,40 +297,50 @@
                 {% if igcse_results %}
                     {% for subject, results in igcse_results.items() %}
                         <h5>{{ subject }}</h5>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>First Name</th>
-                                    <th>Last Name</th>
-                                    <th>Session</th>
-                                    <th>Grade</th>
-                                    <th>Score</th>
-                                    <th>Result Date</th>
-                                    <th>Status</th>
-                                    <th>Components</th>
-                                    <th>Weights</th>
-                                    <th>Component Scores</th>
-                                    <th>Remarks</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for result in results %}
+                        <div class="results-table-container">
+                            <table>
+                                <thead>
                                     <tr>
-                                        <td>{{ result[0] }}</td>
-                                        <td>{{ result[1] }}</td>
-                                        <td>{{ result[4] }}</td>
-                                        <td>{{ result[5] }}</td>
-                                        <td>{{ result[6] }}</td>
-                                        <td>{{ result[7] }}</td>
-                                        <td>{{ result[8] }}</td>
-                                        <td>{{ result[9] if result[9] else 'N/A' }}</td>
-                                        <td>{{ result[10] if result[10] else 'N/A' }}</td>
-                                        <td>{{ result[11] if result[11] else 'N/A' }}</td>
-                                        <td>{{ result[12] if result[12] else 'N/A' }}</td>
+                                        <th>First Name</th>
+                                        <th>Last Name</th>
+                                        <th>Session</th>
+                                        <th>Grade</th>
+                                        <th>Score</th>
+                                        <th>Result Date</th>
+                                        <th>Status</th>
+                                        <th>Component</th>
+                                        <th>Weight</th>
+                                        <th>Component Score</th>
+                                        <th>Remarks</th>
                                     </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {% for result in results %}
+                                        {% set components = result[9].split(',') if result[9] else ['N/A'] %}
+                                        {% set weights = result[10].split(',') if result[10] else ['N/A'] %}
+                                        {% set scores = result[11].split(',') if result[11] else ['N/A'] %}
+                                        {% set remarks = result[12].split(',') if result[12] else ['N/A'] %}
+                                        {% for i in range(components|length) %}
+                                            <tr>
+                                                {% if loop.first %}
+                                                    <td rowspan="{{ components|length }}">{{ result[0] }}</td>
+                                                    <td rowspan="{{ components|length }}">{{ result[1] }}</td>
+                                                    <td rowspan="{{ components|length }}">{{ result[4] }}</td>
+                                                    <td rowspan="{{ components|length }}">{{ result[5] }}</td>
+                                                    <td rowspan="{{ components|length }}">{{ result[6] }}</td>
+                                                    <td rowspan="{{ components|length }}">{{ result[7] }}</td>
+                                                    <td rowspan="{{ components|length }}">{{ result[8] }}</td>
+                                                {% endif %}
+                                                <td>{{ components[i] if components[i] != 'N/A' else 'N/A' }}</td>
+                                                <td>{{ weights[i] if weights[i] != 'N/A' else 'N/A' }}</td>
+                                                <td>{{ scores[i] if scores[i] != 'N/A' else 'N/A' }}</td>
+                                                <td>{{ remarks[i] if remarks[i] != 'N/A' else 'N/A' }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     {% endfor %}
                 {% else %}
                     <p class="no-results">No IGCSE results available.</p>
@@ -335,40 +351,50 @@
                 {% if alevel_results %}
                     {% for subject, results in alevel_results.items() %}
                         <h5>{{ subject }}</h5>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>First Name</th>
-                                    <th>Last Name</th>
-                                    <th>Session</th>
-                                    <th>Grade</th>
-                                    <th>Score</th>
-                                    <th>Result Date</th>
-                                    <th>Status</th>
-                                    <th>Components</th>
-                                    <th>Weights</th>
-                                    <th>Component Scores</th>
-                                    <th>Remarks</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for result in results %}
+                        <div class="results-table-container">
+                            <table>
+                                <thead>
                                     <tr>
-                                        <td>{{ result[0] }}</td>
-                                        <td>{{ result[1] }}</td>
-                                        <td>{{ result[4] }}</td>
-                                        <td>{{ result[5] }}</td>
-                                        <td>{{ result[6] }}</td>
-                                        <td>{{ result[7] }}</td>
-                                        <td>{{ result[8] }}</td>
-                                        <td>{{ result[9] if result[9] else 'N/A' }}</td>
-                                        <td>{{ result[10] if result[10] else 'N/A' }}</td>
-                                        <td>{{ result[11] if result[11] else 'N/A' }}</td>
-                                        <td>{{ result[12] if result[12] else 'N/A' }}</td>
+                                        <th>First Name</th>
+                                        <th>Last Name</th>
+                                        <th>Session</th>
+                                        <th>Grade</th>
+                                        <th>Score</th>
+                                        <th>Result Date</th>
+                                        <th>Status</th>
+                                        <th>Component</th>
+                                        <th>Weight</th>
+                                        <th>Component Score</th>
+                                        <th>Remarks</th>
                                     </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {% for result in results %}
+                                        {% set components = result[9].split(',') if result[9] else ['N/A'] %}
+                                        {% set weights = result[10].split(',') if result[10] else ['N/A'] %}
+                                        {% set scores = result[11].split(',') if result[11] else ['N/A'] %}
+                                        {% set remarks = result[12].split(',') if result[12] else ['N/A'] %}
+                                        {% for i in range(components|length) %}
+                                            <tr>
+                                                {% if loop.first %}
+                                                    <td rowspan="{{ components|length }}">{{ result[0] }}</td>
+                                                    <td rowspan="{{ components|length }}">{{ result[1] }}</td>
+                                                    <td rowspan="{{ components|length }}">{{ result[4] }}</td>
+                                                    <td rowspan="{{ components|length }}">{{ result[5] }}</td>
+                                                    <td rowspan="{{ components|length }}">{{ result[6] }}</td>
+                                                    <td rowspan="{{ components|length }}">{{ result[7] }}</td>
+                                                    <td rowspan="{{ components|length }}">{{ result[8] }}</td>
+                                                {% endif %}
+                                                <td>{{ components[i] if components[i] != 'N/A' else 'N/A' }}</td>
+                                                <td>{{ weights[i] if weights[i] != 'N/A' else 'N/A' }}</td>
+                                                <td>{{ scores[i] if scores[i] != 'N/A' else 'N/A' }}</td>
+                                                <td>{{ remarks[i] if remarks[i] != 'N/A' else 'N/A' }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     {% endfor %}
                 {% else %}
                     <p class="no-results">No A-Level results available.</p>
@@ -382,10 +408,15 @@
             event.preventDefault();
             const form = event.target;
             const formData = new FormData(form);
-            const response = await fetch('/admin/fetch_result', {
+            const response = await fetch('http://127.0.0.1:5001/admin/fetch_result', {
                 method: 'POST',
                 body: formData
             });
+            if (!response.ok) {
+                console.error('Fetch error:', await response.text());
+                document.getElementById('fetchResults').innerHTML = `<p class="error">Server error: ${await response.text()}</p>`;
+                return;
+            }
             const data = await response.json();
             const resultsDiv = document.getElementById('fetchResults');
             if (data.error) {
@@ -393,28 +424,34 @@
             } else if (data.message && data.message === 'No results found') {
                 resultsDiv.innerHTML = `<p class="no-results">No results found for the given filters.</p>`;
             } else {
-                let html = '<table><thead><tr><th>Result ID</th><th>First Name</th><th>Last Name</th><th>Subject</th><th>Exam Level</th><th>Session</th><th>Grade</th><th>Score</th><th>Result Date</th><th>Status</th><th>Components</th><th>Weights</th><th>Component Scores</th><th>Remarks</th></tr></thead><tbody>';
+                let html = '<div class="results-table-container"><table><thead><tr><th>First Name</th><th>Last Name</th><th>Session</th><th>Grade</th><th>Score</th><th>Result Date</th><th>Status</th><th>Component</th><th>Weight</th><th>Component Score</th><th>Remarks</th></tr></thead><tbody>';
                 data.results.forEach(result => {
-                    html += `<tr>
-                        <td>${result[0]}</td>
-                        <td>${result[1]}</td>
-                        <td>${result[2]}</td>
-                        <td>${result[3]}</td>
-                        <td>${result[4]}</td>
-                        <td>${result[5]}</td>
-                        <td>${result[6]}</td>
-                        <td>${result[7]}</td>
-                        <td>${result[8]}</td>
-                        <td>${result[9]}</td>
-                        <td>${result[10] || 'N/A'}</td>
-                        <td>${result[11] || 'N/A'}</td>
-                        <td>${result[12] || 'N/A'}</td>
-                        <td>${result[13] || 'N/A'}</td>
-                    </tr>`;
+                    const components = result[10] ? result[10].split(',') : ['N/A'];
+                    const weights = result[11] ? result[11].split(',') : ['N/A'];
+                    const scores = result[12] ? result[12].split(',') : ['N/A'];
+                    const remarks = result[13] ? result[13].split(',') : ['N/A'];
+                    for (let i = 0; i < components.length; i++) {
+                        html += '<tr>';
+                        if (i === 0) {
+                            html += `<td rowspan="${components.length}">${result[1]}</td>`;
+                            html += `<td rowspan="${components.length}">${result[2]}</td>`;
+                            html += `<td rowspan="${components.length}">${result[5]}</td>`;
+                            html += `<td rowspan="${components.length}">${result[6]}</td>`;
+                            html += `<td rowspan="${components.length}">${result[7]}</td>`;
+                            html += `<td rowspan="${components.length}">${result[8]}</td>`;
+                            html += `<td rowspan="${components.length}">${result[9]}</td>`;
+                        }
+                        html += `<td>${components[i] || 'N/A'}</td>`;
+                        html += `<td>${weights[i] || 'N/A'}</td>`;
+                        html += `<td>${scores[i] || 'N/A'}</td>`;
+                        html += `<td>${remarks[i] || 'N/A'}</td>`;
+                        html += '</tr>';
+                    }
                 });
-                html += '</tbody></table>';
+                html += '</tbody></table></div>';
                 resultsDiv.innerHTML = html;
             }
+            console.log('Fetch response:', data); // Debug
         }
 
         async function addResult(event) {
@@ -465,7 +502,6 @@
                 responseDiv.innerHTML = `<p class="error">${data.error}</p>`;
             } else {
                 responseDiv.innerHTML = `<p class="success">${data.success}</p>`;
-                // Optionally refresh the fetch results table
                 fetchResults(new Event('submit')); // Re-run fetchResults to update the display
             }
         }

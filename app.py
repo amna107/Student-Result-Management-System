@@ -92,6 +92,7 @@ def student_result():
 
         query = """
             SELECT u.FirstName, u.LastName, s.SubjectName, e.ExamLevel, ses.SessionName, r.Grade, r.Score,
+                   r.ResultDate, r.Status,
                    GROUP_CONCAT(rd.Component) AS Components,
                    GROUP_CONCAT(rd.Weight) AS Weights,
                    GROUP_CONCAT(rd.ComponentScore) AS ComponentScores,
@@ -124,7 +125,7 @@ def student_result():
 
         query += """
             GROUP BY r.ResultID, u.FirstName, u.LastName, s.SubjectName, e.ExamLevel, ses.SessionName, 
-                     r.Grade, r.Score
+                     r.Grade, r.Score, r.ResultDate, r.Status
         """
 
         cursor.execute(query, params)
@@ -207,7 +208,16 @@ def admin_fetch_result():
 
     if not results:
         return jsonify({'message': 'No results found'})
-    return jsonify({'results': results})
+
+    # Format results to ensure consistent date format
+    formatted_results = []
+    for result in results:
+        formatted_result = list(result)  # Convert tuple to list for modification
+        if result[8]:  # Check if ResultDate exists (index 8)
+            formatted_result[8] = result[8].strftime('%Y-%m-%d')  # Format to YYYY-MM-DD
+        formatted_results.append(tuple(formatted_result))
+
+    return jsonify({'results': formatted_results})
 
 # Admin add result
 @app.route('/admin/add_result', methods=['POST'])

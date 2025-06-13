@@ -82,8 +82,13 @@
             background: linear-gradient(90deg, #212121, #424242);
             transform: translateY(-3px);
         }
+        .results-table-container {
+            overflow-x: auto; /* Horizontal scrolling for wide tables */
+            max-width: 100%;
+        }
         table {
             width: 100%;
+            min-width: 800px; /* Minimum width to ensure readability */
             border-collapse: collapse;
             margin-top: 20px;
             background-color: #ffffff;
@@ -97,6 +102,7 @@
         th, td {
             padding: 15px;
             text-align: left;
+            white-space: nowrap; /* Prevent text wrapping */
         }
         th {
             background: linear-gradient(90deg, #d32f2f, #b71c1c);
@@ -136,11 +142,11 @@
 </head>
 <body>
     <div class="header">
-      Student Result Record System
+        Student Result Record System
     </div>
     <div class="container">
         <h2>Results for Student {{ user_id }}</h2>
-        <form class="filter-form" method="POST" onsubmit="console.log('Form submitted with:', new FormData(this))">
+        <form class="filter-form" method="POST">
             <input type="text" name="subject_name" placeholder="Subject Name">
             <select name="exam_level">
                 <option value="">All Exam Levels</option>
@@ -150,45 +156,54 @@
             <input type="text" name="session_name" placeholder="Session Name">
             <input type="submit" value="Filter">
         </form>
-       <!-- Inside student_result.html -->
-{% if results %}
-<table>
-    <thead>
-        <tr>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Subject</th>
-            <th>Exam Level</th>
-            <th>Session</th>
-            <th>Grade</th>
-            <th>Score</th>
-            <th>Components</th>
-            <th>Weights</th>
-            <th>Component Scores</th>
-            <th>Remarks</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for result in results %}
-            <tr>
-                <td>{{ result[0] }}</td>
-                <td>{{ result[1] }}</td>
-                <td>{{ result[2] }}</td>
-                <td>{{ result[3] }}</td>
-                <td>{{ result[4] }}</td>
-                <td>{{ result[5] }}</td>
-                <td>{{ result[6] }}</td>
-                <td>{{ result[7] if result[7] else 'N/A' }}</td>
-                <td>{{ result[8] if result[8] else 'N/A' }}</td>
-                <td>{{ result[9] if result[9] else 'N/A' }}</td>
-                <td>{{ result[10] if result[10] else 'N/A' }}</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p class="no-results">No results to display. Use the filters above to search.</p>
-{% endif %}
+        <div class="results-table-container">
+            {% if results %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Exam Level</th>
+                        <th>Session</th>
+                        <th>Grade</th>
+                        <th>Score</th>
+                        <th>Result Date</th>
+                        <th>Status</th>
+                        <th>Component</th>
+                        <th>Weight</th>
+                        <th>Component Score</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                        {% set components = result[9].split(',') if result[9] else ['N/A'] %}
+                        {% set weights = result[10].split(',') if result[10] else ['N/A'] %}
+                        {% set scores = result[11].split(',') if result[11] else ['N/A'] %}
+                        {% set remarks = result[12].split(',') if result[12] else ['N/A'] %}
+                        {% for i in range(components|length) %}
+                            <tr>
+                                {% if loop.first %}
+                                    <td rowspan="{{ components|length }}">{{ result[2] }}</td>
+                                    <td rowspan="{{ components|length }}">{{ result[3] }}</td>
+                                    <td rowspan="{{ components|length }}">{{ result[4] }}</td>
+                                    <td rowspan="{{ components|length }}">{{ result[5] }}</td>
+                                    <td rowspan="{{ components|length }}">{{ result[6] }}</td>
+                                    <td rowspan="{{ components|length }}">{{ result[7] if result[7] else 'N/A' }}</td>
+                                    <td rowspan="{{ components|length }}">{{ result[8] if result[8] else 'N/A' }}</td>
+                                {% endif %}
+                                <td>{{ components[i] if components[i] != 'N/A' else 'N/A' }}</td>
+                                <td>{{ weights[i] if weights[i] != 'N/A' else 'N/A' }}</td>
+                                <td>{{ scores[i] if scores[i] != 'N/A' else 'N/A' }}</td>
+                                <td>{{ remarks[i] if remarks[i] != 'N/A' else 'N/A' }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="no-results">No results to display. Use the filters above to search.</p>
+            {% endif %}
+        </div>
         <div class="back-link">
             <a href="{{ url_for('student_dashboard') }}">Back to Dashboard</a>
         </div>
